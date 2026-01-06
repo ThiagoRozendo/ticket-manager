@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -15,6 +16,20 @@ async function bootstrap() {
 
   app.enableCors();
 
+  const config = new DocumentBuilder()
+    .setTitle('Ticket Manager API')
+    .setDescription('API para gerenciamento de usuários e ingressos para shows')
+    .setVersion('1.0')
+    .addTag('Users', 'Endpoints para gerenciamento de usuários')
+    .addTag('Tickets', 'Endpoints para gerenciamento de ingressos')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
+
   await app.listen(process.env.PORT ?? 3000);
+  
+  console.log(`Application is running on: http://localhost:${process.env.PORT ?? 3000}`);
+  console.log(`Swagger documentation: http://localhost:${process.env.PORT ?? 3000}/api`);
 }
 bootstrap();
