@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ticket-manager-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ticket_manager
+    ports:
+      - '5433:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ticket-manager-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d ticket_manager']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      target: development
+      dockerfile: Dockerfile
+    container_name: ticket-manager-api
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/ticket_manager?schema=public
+      PORT: 3000
+      NODE_ENV: development
+    ports:
+      - '3000:3000'
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ticket-manager-network
+    command: npm run start:dev
+
+volumes:
+  postgres_data:
+
+networks:
+  ticket-manager-network:
+    driver: bridge

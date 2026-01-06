@@ -1,0 +1,12 @@
+node_modules
+
+.env
+
+dist
+build
+
+/generated/prisma
+
+*.pid
+*.seed
+*.pid.lock
